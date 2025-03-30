@@ -1,0 +1,28 @@
+# Build directories
+build/
+lib/
+
+# Fortran specific
+*.mod
+*.o
+*.obj
+*.exe
+*.out
+*.app
+
+# C specific
+*.o
+*.obj
+*.exe
+*.out
+*.app
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db 
