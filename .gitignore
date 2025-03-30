@@ -1,5 +1,6 @@
 # Build directories
 build/
+data/
 lib/
 
 # Fortran specific
