@@ -40,7 +40,7 @@ clean_fortran_file() {
     local file="$1"
     echo "Cleaning Fortran file: $file"
     # Remove comments after column 72 that might cause continuation issues
-    sed -i '' 's/\(^.\{72\}\).*/\1/' "$file"
+    sed -i 's/\(^.\{72\}\).*/\1/' "$file"
 }
 
 # List of .for files that exist in the repository
@@ -67,6 +67,10 @@ for file in "${FOR_FILES[@]}"; do
         fi
     fi
 done
+
+# Find and replace for irifun.for: 
+sed -i 's|common /igrz/aig,arz,iymst,iymend|common /igrz/iymst,iymend\n       common /agrz/aig,arz|g' "$FORTRAN_DIR/irifun.for"
+sed -i 's|common /igrz/ionoindx,indrz,iymst,iymend|common /igrz/iymst,iymend\n       common /agrz/ionoindx,indrz|g' "$FORTRAN_DIR/irifun.for"
 
 # Download dgrf files from 1945 to 2015 in steps of 5 years
 echo "Starting downloads of dgrf coefficient files from $IRI_URL"
