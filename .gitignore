@@ -10,6 +10,7 @@ lib/
 *.exe
 *.out
 *.app
+*.for
 
 # C specific
 *.o
@@ -26,4 +27,4 @@ lib/
 
 # OS specific
 .DS_Store
-Thumbs.db 
+Thumbs.db
