@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h> 
 #include "iri.h"
 
 int main()
@@ -74,6 +75,45 @@ int main()
              &heibeg, &heiend, &heistp, &a[0][0], b);
     printf("iri_sub_ call finished.\n");
 
+    // Calculate number of height steps before the loop
+    int num_rows_outf = (int)((heiend - heibeg) / heistp) + 1;
+
+    // Divide column 0 by 1.0e6 to convert from m^-3 to cm^-3
+    // for the output array 'a' (OUTF)
+    for (int i = 0; i < num_rows_outf; i++) {
+        a[i][0] /= 1.0e6; // Convert to cm^-3 
+    }
+
+    // Open CSV file for writing
+    FILE *outf_file = fopen("output.csv", "w");
+    if (outf_file == NULL) {
+        fprintf(stderr, "Error opening file for writing.\n");
+        return 1;
+    }
+    // Write header line
+    fprintf(outf_file, "Height (km),");
+    // Create array of strings for parameter names
+    const char *param_names[20] = {
+        "Ne (cm^-3)", "NmF2 (cm^-3)", "HmF2 (km)", "TeF2 (K)",
+        "NmE (cm^-3)", "HmE (km)", "TeE (K)", "NeE (cm^-3)",
+        "B0 (km)", "B1", "B2", "B3", "B4", "B5", "B6",
+        "B7", "B8", "B9", "B10", "B11"
+    };
+    for (int j = 0; j < 20; j++) {
+        fprintf(outf_file, "%s,", param_names[j]);
+    }
+    fprintf(outf_file, "\n");
+    // Write data rows
+    for (int i = 0; i < num_rows_outf; i++) {
+        float current_height = heibeg + i * heistp;
+        fprintf(outf_file, "%d", (int)current_height);
+        // Write all 20 parameters for this height
+        for (int j = 0; j < 20; j++) {
+            fprintf(outf_file, ",%d", (int)(a[i][j] + 0.5f));
+        }
+        fprintf(outf_file, "\n");
+    }
+    fclose(outf_file);
 
     // --- Accessing Output Data ---
     // Example: Print selected values from 'b' (OARR array)
@@ -93,8 +133,6 @@ int main()
 
     // Example: Print Electron Density profile from 'a' (OUTF array, column 1)
     printf("\nElectron Density profile from 'a' (OUTF(*, 1)):\n");
-    // Calculate number of height steps before the loop
-    int num_rows_outf = (int)((heiend - heibeg) / heistp) + 1;
 
     for (int i = 0; i < num_rows_outf; i++) {
         float electron_density_m3 = a[i][0]; // OUTF(i+1, 1) in Fortran indexing
