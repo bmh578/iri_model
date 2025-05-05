@@ -282,7 +282,31 @@ This command:
 - Runs the main program and generates all plots automatically
 - Saves the output files to your local `output` directory
 
-#### 3. Access the Generated Plots
+#### 3. Run Interactively
+
+To explore the container environment, make modifications, or run commands manually:
+
+```bash
+docker run -it --name iri-interactive iri2016-model /bin/bash
+```
+
+From within the container, you can:
+- Run the application directly: `cd /app/build && ./main`
+- Generate plots: `cd /app/build && ./plot_results`
+- Modify and rebuild the code: `cd /app && make clean && make`
+- Explore the file structure and data files
+
+#### 4. Mount Local Files for Development
+
+To work on the source code files from your host machine while using the container for building and running:
+
+```bash
+docker run -it --name iri-dev -v $(pwd)/src:/app/src -v $(pwd)/output:/app/build iri2016-model /bin/bash
+```
+
+This mounts your local `src` directory to the container's `/app/src` directory, allowing you to edit files locally while building and running in the container.
+
+#### 5. Access the Generated Plots
 
 After running the container, you'll find all generated PNG files in your local `output` directory:
 - `electron_density_profile.png`
@@ -316,6 +340,32 @@ This approach avoids permission issues entirely as it simply copies the files af
 - **Reproducible Results**: Always get the same output for the same input parameters
 - **Isolated Environment**: Won't affect your system's libraries or configurations
 
+### Docker Troubleshooting
+
+#### Missing Data Files
+If you encounter errors about missing data files:
+- Ensure the container has all necessary files in `/app/build`
+- The download script might have failed to retrieve some files
+- You can re-run the container with a fresh build: `docker build --no-cache -t iri2016-model .`
+
+#### Library Path Issues
+If you encounter library loading issues:
+- The Dockerfile sets the `LD_LIBRARY_PATH` to include `/usr/lib`
+- You can verify this in the container with: `echo $LD_LIBRARY_PATH`
+- If needed, manually set it: `export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH`
+
+#### Building or Compilation Issues
+If you encounter compilation issues:
+- Run `make clean` before rebuilding: `cd /app && make clean && make`
+- Check library dependencies with: `ldd /app/lib/libiri2016.so`
+- Verify that all source files were downloaded correctly
+
+#### Container Won't Start or Crashes
+If the container fails to start or crashes:
+- Check Docker logs: `docker logs iri-run`
+- Try running in interactive mode to see error messages: `docker run -it iri2016-model /bin/bash`
+- Check if your system has enough resources allocated to Docker
+
 ### Running with Custom Parameters
 
 If you want to modify the model parameters, you can:
@@ -335,6 +385,36 @@ cd build
 ./main
 ./plot_results
 ```
+
+### Using Custom Scripts
+
+For more advanced use cases, you can create custom scripts to run with specific parameters:
+
+1. Create a script in your project (e.g., `run_custom.sh`):
+```bash
+#!/bin/bash
+# Example custom run script
+cd /app
+make clean
+make
+cd build
+# Run with custom arguments or process results in a specific way
+./main
+./plot_results
+# Process or analyze results
+```
+
+2. Make it executable: 
+```bash
+chmod +x run_custom.sh
+```
+
+3. Run your container with this script:
+```bash
+docker run --rm -v $(pwd)/run_custom.sh:/app/run_custom.sh -v $(pwd)/output:/app/build iri2016-model /app/run_custom.sh
+```
+
+This approach allows for automation of complex workflows while maintaining the benefits of containerization.
 
 ### Docker Container Internals
 
