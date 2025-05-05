@@ -56,6 +56,9 @@ FOR_FILES=(
     "iritest.for"
 )
 
+# Track if irifun.for was downloaded
+IRIFUN_DOWNLOADED=false
+
 # Download Fortran files
 echo "Starting downloads of Fortran files from $IRI_URL"
 for file in "${FOR_FILES[@]}"; do
@@ -64,13 +67,22 @@ for file in "${FOR_FILES[@]}"; do
     else
         if download_file "$file" "${IRI_URL}/${file}" "$FORTRAN_DIR"; then
             clean_fortran_file "$FORTRAN_DIR/$file"
+            if [ "$file" = "irifun.for" ]; then
+                IRIFUN_DOWNLOADED=true
+            fi
         fi
     fi
 done
 
-# Find and replace for irifun.for: 
-sed -i 's|common /igrz/aig,arz,iymst,iymend|common /igrz/iymst,iymend\n       common /agrz/aig,arz|g' "$FORTRAN_DIR/irifun.for"
-sed -i 's|common /igrz/ionoindx,indrz,iymst,iymend|common /igrz/iymst,iymend\n       common /agrz/ionoindx,indrz|g' "$FORTRAN_DIR/irifun.for"
+# Find and replace for irifun.for only if it was downloaded
+if [ "$IRIFUN_DOWNLOADED" = true ]; then
+    echo "Applying necessary modifications to irifun.for for proper compilation"
+    sed -i 's|common /igrz/aig,arz,iymst,iymend|common /igrz/iymst,iymend\n       common /agrz/aig,arz|g' "$FORTRAN_DIR/irifun.for"
+    sed -i 's|common	/igrz/ionoindx,indrz,iymst,iymend|common /igrz/iymst,iymend\n       common /agrz/ionoindx,indrz|g' "$FORTRAN_DIR/irifun.for"
+else
+    echo "Note: Using existing irifun.for without modifications."
+    echo "If compilation fails, you may need to manually modify common blocks in irifun.for."
+fi
 
 # Download dgrf files from 1945 to 2015 in steps of 5 years
 echo "Starting downloads of dgrf coefficient files from $IRI_URL"
