@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:25.04
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     gnuplot \
     fonts-freefont-ttf \
     libcairo2 \
-    libpango1.0-0 \
+    libpango-1.0-0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,9 +31,6 @@ RUN chmod +x ./scripts/download_iri.sh
 
 # Fix potential Windows line endings in shell script
 RUN sed -i 's/\r$//' ./scripts/download_iri.sh
-
-# Temporarily copy and replace irifun.for file
-COPY src/fortran/iri2016/irifun.for ./src/fortran/iri2016/
 
 # Build the library and executable
 RUN make
