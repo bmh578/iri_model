@@ -15,8 +15,8 @@ int main()
     int jmag = 0;         // Use geographic coordinates (0) or geomagnetic (1)
     float lat = 37.8;     // Geographic latitude (degrees)
     float lon = -75.4;    // Geographic longitude (degrees)
-    int iy = 2017;        // Year
-    int mmdd = 1010;      // Month and day (MMDD format), or negative day-of-year (-DDD)
+    int iy = 2021;        // Year
+    int mmdd = 0303;      // Month and day (MMDD format), or negative day-of-year (-DDD)
     float dhour = 11.0 + 25;   // Hour (decimal); add 25 for UTC, 0 for local time
     float heibeg = 600.0; // Start height (km)
     float heiend = 800.0; // End height (km)

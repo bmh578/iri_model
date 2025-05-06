@@ -130,9 +130,14 @@ The main application runs the IRI model with predefined parameters and saves the
 ./build/main
 ```
 
+The application will:
+1. Run the IRI-2016 model with the default parameters
+2. Generate output data in `build/output.csv`
+3. Display key ionospheric parameters in the terminal
+
 Default model parameters in `main.c`:
 - Geographic coordinates: 37.8°N, 75.4°W
-- Date: October 10, 2017, 11:00 UTC
+- Date: March 3, 2021, 11:00 UTC
 - Height range: 600-800 km with 10 km steps
 
 You can modify these parameters in `src/c/main.c` and recompile if needed.
@@ -282,6 +287,8 @@ This command:
 - Runs the main program and generates all plots automatically
 - Saves the output files (PNG plots and CSV data) to your local `output` directory
 
+> **IMPORTANT**: All output plots and data files are generated inside the container in the `/app/plots` directory. To access these files on your local machine, you must either use volume mounting as shown above or copy the files using docker cp as shown in the "Accessing Generated Plots" section below.
+
 #### 3. Run Interactively
 
 To explore the container environment, make modifications, or run commands manually:
@@ -306,17 +313,35 @@ docker run -it --name iri-dev -v $(pwd)/src:/app/src -v $(pwd)/output:/app/build
 
 This mounts your local `src` directory to the container's `/app/src` directory, allowing you to edit files locally while building and running in the container.
 
-#### 5. Access the Generated Plots
+#### 5. Accessing the Generated Plots
 
-After running the container, you'll find all generated PNG files and CSV data in your local `output` directory:
+After running the container, the generated plots and data files need to be transferred to your local machine.
+
+**Method 1: Using Volume Mounts (Recommended)**
+
+When running the container with a volume mount as shown in step 2 above, all files will automatically appear in your local `output` directory:
+
+```bash
+# Create a local output directory if it doesn't exist
+mkdir -p output
+
+# Run the container with the volume mount
+docker run --name iri-run -v $(pwd)/output:/app/plots iri2016-model
+
+# Check your local output directory
+ls -la output
+```
+
+You'll find these files in your local output directory:
 - `electron_density_profile.png`
 - `f2_layer_parameters.png`
+- `e_layer_parameters.png`
+- `bottomside_parameters.png`
+- `electron_temperature_profile.png`
+- `f2e_density_ratio.png`
 - `output.csv`
-- And other plot files as specified in the plotting program
 
-These files are copied from the container's `/app/build` directory to the `/app/plots` directory during execution.
-
-#### Alternative: Using Docker CP for Permission Issues
+**Method 2: Using Docker CP for Permission Issues**
 
 If you encounter permission issues with volume mounts (which can happen on certain systems), you can use `docker cp` to copy the output files from the container instead:
 
