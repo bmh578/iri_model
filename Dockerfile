@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
 
 # Create directory structure
 WORKDIR /app
-RUN mkdir -p src/fortran/iri2016 src/c include lib build scripts
+RUN mkdir -p src/fortran/iri2016 src/c include lib build scripts plots
 
 # Copy files
 COPY Makefile ./
@@ -44,5 +44,5 @@ ENV LD_LIBRARY_PATH="/usr/lib"
 # Cd into the build directory
 WORKDIR /app/build
 
-# Run the main program and generate plots when the container starts
-CMD ["/bin/bash", "-c", "./main && ./plot_results && echo 'Plot files generated in the /app/build directory:' && ls -l *.png"]
+# Run the main program, generate plots, and move results to the plots directory
+CMD ["/bin/bash", "-c", "./main && ./plot_results && echo 'Moving output files to /app/plots directory...' && cp *.png *.csv /app/plots/ && echo 'Files moved successfully:' && ls -l /app/plots/"]
