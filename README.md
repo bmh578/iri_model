@@ -145,7 +145,7 @@ After running the main application, use the plotting utility to generate visuali
 ./build/plot_results
 ```
 
-This will create several PNG files in the build directory:
+This will create several PNG files in the `build` directory initially, and when running with Docker, these files are automatically moved to the `/app/plots` directory:
 
 1. `electron_density_profile.png` - Electron density vs. height
 2. `f2_layer_parameters.png` - F2 layer parameters (NmF2, HmF2, TeF2)
@@ -273,14 +273,14 @@ This command builds a Docker image named `iri2016-model` using the configuration
 #### 2. Run the Container
 
 ```bash
-docker run --name iri-run -v $(pwd)/output:/app/build iri2016-model
+docker run --name iri-run -v $(pwd)/output:/app/plots iri2016-model
 ```
 
 This command:
 - Creates a container named `iri-run`
-- Mounts the `output` directory from your local machine to the `/app/build` directory in the container
+- Mounts the `output` directory from your local machine to the `/app/plots` directory in the container
 - Runs the main program and generates all plots automatically
-- Saves the output files to your local `output` directory
+- Saves the output files (PNG plots and CSV data) to your local `output` directory
 
 #### 3. Run Interactively
 
@@ -308,10 +308,13 @@ This mounts your local `src` directory to the container's `/app/src` directory, 
 
 #### 5. Access the Generated Plots
 
-After running the container, you'll find all generated PNG files in your local `output` directory:
+After running the container, you'll find all generated PNG files and CSV data in your local `output` directory:
 - `electron_density_profile.png`
-- `ionospheric_parameters.png`
-- Other plot files as specified in the plotting program
+- `f2_layer_parameters.png`
+- `output.csv`
+- And other plot files as specified in the plotting program
+
+These files are copied from the container's `/app/build` directory to the `/app/plots` directory during execution.
 
 #### Alternative: Using Docker CP for Permission Issues
 
@@ -322,13 +325,16 @@ If you encounter permission issues with volume mounts (which can happen on certa
 docker run --name iri-run iri2016-model
 
 # Copy the output files from the container to your local machine
-# This works even if the container has stopped
-docker cp iri-run:/app/build/electron_density_profile.png ./
-docker cp iri-run:/app/build/ionospheric_parameters.png ./
-docker cp iri-run:/app/build/output.csv ./
+# The files will be in the /app/plots directory in the container
+docker cp iri-run:/app/plots/electron_density_profile.png ./
+docker cp iri-run:/app/plots/f2_layer_parameters.png ./
+docker cp iri-run:/app/plots/output.csv ./
 
-# To copy all PNG files at once
-docker cp iri-run:/app/build/*.png ./output/
+# To copy all files at once
+mkdir -p ./output
+docker cp iri-run:/app/plots/. ./output/
+# Then you can filter just the PNG files if needed
+find ./output -name "*.png" -maxdepth 1
 ```
 
 This approach avoids permission issues entirely as it simply copies the files after they've been generated, rather than trying to write directly to a mounted volume.
