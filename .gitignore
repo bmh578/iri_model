@@ -2,6 +2,7 @@
 build/
 data/
 lib/
+plots/
 
 # Fortran specific
 *.mod
